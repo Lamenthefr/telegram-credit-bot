@@ -19,13 +19,14 @@ logging.basicConfig(
 )
 
 # 👋 Message de bienvenue + menu boutons\async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     database.create_user_if_not_exists(user.id, user.username)
-    
+
     text = (
-        f"Bonjour {user.first_name} !\n\n"
-        f"🔐 ID utilisateur : `{user.id}`\n"
-        f"📄 Nom d'utilisateur : @{user.username}\n\n"
+        f"Bonjour {user.first_name} !\\n\\n"
+        f"🔐 ID utilisateur : `{user.id}`\\n"
+        f"📄 Nom d'utilisateur : @{user.username}\\n\\n"
         "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
     )
 
