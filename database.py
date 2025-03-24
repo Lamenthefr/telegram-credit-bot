@@ -1,1 +1,0 @@
-# database.py - logique base de données (à compléter)
