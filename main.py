@@ -1,4 +1,3 @@
-# Nouveau fichier main.py amélioré et vérifié ligne par ligne avec boutons + message de bienvenue
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -15,18 +14,18 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
 )
 
-# 👋 Message de bienvenue + menu boutons\async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     database.create_user_if_not_exists(user.id, user.username)
 
     text = (
-        f"Bonjour {user.first_name} !\\n\\n"
-        f"🔐 ID utilisateur : `{user.id}`\\n"
-        f"📄 Nom d'utilisateur : @{user.username}\\n\\n"
+        f"Bonjour {user.first_name} !\n\n"
+        f"🔐 ID utilisateur : `{user.id}`\n"
+        f"📄 Nom d'utilisateur : @{user.username}\n\n"
         "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
     )
 
@@ -38,7 +37,6 @@ logging.basicConfig(
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_markdown(text, reply_markup=reply_markup)
 
-# 💼 Commande /solde
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_data = database.get_user(user.id)
@@ -47,18 +45,16 @@ async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ Utilisateur non trouvé.")
 
-# 🔢 Commande /info
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
         "📄 *Documents disponibles* :\n\n"
         "🇫🇷 France : Carte ID, Passeport, EDF, Banque, etc.\n"
         "🇺🇸 USA : SSN, Factures, Bank Statement\n"
         "🇬🇧 UK, 🇨🇦 Canada, 🇩🇪 Allemagne, etc.\n\n"
-        "🔹 Pour usage test, démo, développement uniquement."
+        "🧾 Pour usage test, démo, développement uniquement."
     )
     await update.message.reply_markdown(msg)
 
-# 🔙 Gestion des boutons inline (menu principal)
 async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
@@ -79,9 +75,9 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🇫🇷 France : Carte ID, Passeport, EDF, etc.\n"
             "🇺🇸 USA : SSN, Relevé bancaire\n"
             "🇬🇧 UK, 🇨🇦 Canada...\n",
-            parse_mode='Markdown')
+            parse_mode='Markdown'
+        )
 
-# 📊 Fonction principale async avec nest_asyncio
 async def main():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
 
@@ -92,7 +88,6 @@ async def main():
     application.add_handler(CallbackQueryHandler(handle_buttons))
     application.add_handler(CallbackQueryHandler(handlers.recharge_buttons, pattern="^deposit_"))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.handle_message))
-
     application.add_handler(CommandHandler("ajouter_credit", admin_handlers.ajouter_credit))
     application.add_handler(CommandHandler("broadcast", admin_handlers.broadcast))
     application.add_handler(CommandHandler("stats", admin_handlers.stats))
