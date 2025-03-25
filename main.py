@@ -27,17 +27,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Bonjour {user.first_name} !\n\n"
         f"ID utilisateur : {user.id}\n"
         f"Nom d'utilisateur : @{user.username}\n\n"
-        "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
+        "🔱 Bienvenue dans l'AutoShop de Scan ID 🔱\n"
+        "Tous nos documents sont disponibles à *15€*\n"
+        "Les paiements s'effectuent uniquement en crypto.\n\n"
+        "📌 Cliquez sur 🔱 Infos 🔱 pour découvrir tout ce que nous proposons."
     )
 
     keyboard = [
-        [InlineKeyboardButton("💳 Recharger", callback_data="menu_recharger")],
-        [InlineKeyboardButton("💼 Solde", callback_data="menu_solde")],
-        [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")],
-        [InlineKeyboardButton("👤 Mon Profil", callback_data="profile")]
+        [InlineKeyboardButton("🔱 Générer mon Scan 🔱", callback_data="generate")],
+        [InlineKeyboardButton("🔱 Recharger 🔱", callback_data="menu_recharger")],
+        [InlineKeyboardButton("🔱 Solde 🔱", callback_data="menu_solde")],
+        [InlineKeyboardButton("🔱 Infos 🔱", callback_data="menu_info")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(text, reply_markup=reply_markup)
+    await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')
 
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -79,6 +82,8 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🇬🇧 UK, 🇨🇦 Canada...\n",
             parse_mode='Markdown'
         )
+    elif data == "generate":
+        await query.message.reply_text("⚠️ Fonction de génération à venir. Contactez @admin pour ajouter cette étape.")
     elif data == "profile":
         handlers.show_profile(query)
 
