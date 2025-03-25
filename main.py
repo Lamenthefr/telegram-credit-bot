@@ -1,4 +1,3 @@
-
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -24,14 +23,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     database.create_user_if_not_exists(user.id, user.username)
 
     text = (
-        f"Bonjour {user.first_name} !
-
-"
-        f"ID utilisateur : {user.id}
-"
-        f"Nom d'utilisateur : @{user.username}
-
-"
+        f"Bonjour {user.first_name} !\n\n"
+        f"ID utilisateur : {user.id}\n"
+        f"Nom d'utilisateur : @{user.username}\n\n"
         "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
     )
 
@@ -53,16 +47,10 @@ async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
-        "📄 *Documents disponibles* :
-
-"
-        "🇫🇷 France : Carte ID, Passeport, EDF, Banque, etc.
-"
-        "🇺🇸 USA : SSN, Factures, Bank Statement
-"
-        "🇬🇧 UK, 🇨🇦 Canada, 🇩🇪 Allemagne, etc.
-
-"
+        "📄 *Documents disponibles* :\n\n"
+        "🇫🇷 France : Carte ID, Passeport, EDF, Banque, etc.\n"
+        "🇺🇸 USA : SSN, Factures, Bank Statement\n"
+        "🇬🇧 UK, 🇨🇦 Canada, 🇩🇪 Allemagne, etc.\n\n"
         "🧾 Pour usage test, démo, développement uniquement."
     )
     await update.message.reply_markdown(msg)
@@ -83,15 +71,10 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text("❌ Utilisateur non trouvé.")
     elif data == "menu_info":
         await query.message.reply_text(
-            "📄 *Documents disponibles* :
-
-"
-            "🇫🇷 France : Carte ID, Passeport, EDF, etc.
-"
-            "🇺🇸 USA : SSN, Relevé bancaire
-"
-            "🇬🇧 UK, 🇨🇦 Canada...
-",
+            "📄 *Documents disponibles* :\n\n"
+            "🇫🇷 France : Carte ID, Passeport, EDF, etc.\n"
+            "🇺🇸 USA : SSN, Relevé bancaire\n"
+            "🇬🇧 UK, 🇨🇦 Canada...\n",
             parse_mode='Markdown'
         )
 
