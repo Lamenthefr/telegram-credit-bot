@@ -1,4 +1,5 @@
 
+
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -23,24 +24,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     database.create_user_if_not_exists(user.id, user.username)
 
-text = (
-    f"Bonjour {user.first_name} !\n\n"
-    f"ID utilisateur : {user.id}\n"
-    f"Nom d'utilisateur : @{user.username}\n\n"
-    "🔱 <b>Bienvenue dans l'AutoShop de Scan ID</b> 🔱\n"
-    "Tous nos documents sont disponibles à <b>15€</b>\n"
-    "Les paiements s'effectuent uniquement en crypto.\n\n"
-    "📌 Cliquez sur 🔱 <b>Infos</b> 🔱 pour découvrir tout ce que nous proposons."
-)
+    text = (
+        f"Bonjour {user.first_name} !\n\n"
+        f"ID utilisateur : {user.id}\n"
+        f"Nom d'utilisateur : @{user.username}\n\n"
+        "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
+    )
 
     keyboard = [
-        [InlineKeyboardButton("🔱 Générer mon Scan 🔱", callback_data="generate")],
-        [InlineKeyboardButton("🔱 Recharger 🔱", callback_data="menu_recharger")],
-        [InlineKeyboardButton("🔱 Solde 🔱", callback_data="menu_solde")],
-        [InlineKeyboardButton("🔱 Infos 🔱", callback_data="menu_info")]
+        [InlineKeyboardButton("💳 Recharger", callback_data="menu_recharger")],
+        [InlineKeyboardButton("💼 Solde", callback_data="menu_solde")],
+        [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='HTML')
+
+    await update.message.reply_text(text, reply_markup=reply_markup)
 
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -52,15 +50,15 @@ async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
-        "📄 *Documents disponibles* :\n\n"
-        "🇫🇷 France : Carte ID, Passeport, EDF, Banque, etc.\n"
-        "🇺🇸 USA : SSN, Factures, Bank Statement\n"
-        "🇬🇧 UK, 🇨🇦 Canada, 🇩🇪 Allemagne, etc.\n\n"
+        "📄 Documents disponibles :\n\n"
+        "🇫🇷 France : Carte ID, Passeport, EDF, Banque\n"
+        "🇺🇸 USA : SSN, Bank Statements\n"
+        "🇬🇧 UK, 🇨🇦 CA, 🇩🇪 DE, etc.\n"
         "🧾 Pour usage test, démo, développement uniquement."
     )
-    await update.message.reply_markdown(msg)
+    await update.message.reply_text(msg)
 
-async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_main_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
     await query.answer()
@@ -76,16 +74,11 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text("❌ Utilisateur non trouvé.")
     elif data == "menu_info":
         await query.message.reply_text(
-            "📄 *Documents disponibles* :\n\n"
-            "🇫🇷 France : Carte ID, Passeport, EDF, etc.\n"
-            "🇺🇸 USA : SSN, Relevé bancaire\n"
-            "🇬🇧 UK, 🇨🇦 Canada...\n",
-            parse_mode='Markdown'
+            "📄 Documents disponibles :\n\n"
+            "🇫🇷 France : Carte ID, Passeport, EDF, Banque\n"
+            "🇺🇸 USA : SSN, Bank Statements\n"
+            "🇬🇧 UK, 🇨🇦 CA, 🇩🇪 DE, etc.",
         )
-    elif data == "generate":
-        await query.message.reply_text("⚠️ Fonction de génération à venir. Contactez @admin pour ajouter cette étape.")
-    elif data == "profile":
-        handlers.show_profile(query)
 
 async def main():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -95,15 +88,15 @@ async def main():
     application.add_handler(CommandHandler("info", info))
     application.add_handler(CommandHandler("recharger", handlers.recharge_menu))
 
-    application.add_handler(CallbackQueryHandler(handle_buttons))
+    application.add_handler(CallbackQueryHandler(handle_main_buttons, pattern="^menu_"))
     application.add_handler(CallbackQueryHandler(handlers.recharge_buttons, pattern="^deposit_"))
+
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.handle_message))
 
     application.add_handler(CommandHandler("ajouter_credit", admin_handlers.ajouter_credit))
     application.add_handler(CommandHandler("broadcast", admin_handlers.broadcast))
     application.add_handler(CommandHandler("stats", admin_handlers.stats))
 
-    logging.info("✅ Bot lancé avec succès.")
     await application.run_polling()
 
 if __name__ == "__main__":
