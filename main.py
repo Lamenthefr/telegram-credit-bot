@@ -1,3 +1,4 @@
+
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -7,7 +8,7 @@ from telegram.ext import (
 )
 from dotenv import load_dotenv
 import database
-import handlers.handlers as handlers
+import handlers_corrige as handlers
 import handlers.admin as admin_handlers
 
 load_dotenv()
@@ -32,7 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("💳 Recharger", callback_data="menu_recharger")],
         [InlineKeyboardButton("💼 Solde", callback_data="menu_solde")],
-        [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")]
+        [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")],
+        [InlineKeyboardButton("👤 Mon Profil", callback_data="profile")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(text, reply_markup=reply_markup)
@@ -77,6 +79,8 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🇬🇧 UK, 🇨🇦 Canada...\n",
             parse_mode='Markdown'
         )
+    elif data == "profile":
+        handlers.show_profile(query)
 
 async def main():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
