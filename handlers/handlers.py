@@ -34,23 +34,18 @@ def button(update: Update, context: CallbackContext):
 
 def show_profile(query):
     user = database.get_user(query.from_user.id)
-    query.edit_message_text(
-        text=(
-            f"🔱 Nom d'utilisateur: @{user[1]}
-"
-            f"🔱 Votre ID: {user[0]}
-"
-            f"🔱 Grade: Membre
-"
-            f"🔱 Solde: {user[2]:.2f}€
-"
-            f"🔱 Dépôts Total: {user[3]:.2f}$"
-        ),
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🏠 Accueil", callback_data='start')]
-        ])
-    )
-
+  query.edit_message_text(
+    text=(
+        f"🔱 Nom d'utilisateur: @{user[1]}\n"
+        f"🔱 Votre ID: {user[0]}\n"
+        f"🔱 Grade: Membre\n"
+        f"🔱 Solde: {user[2]:.2f}€\n"
+        f"🔱 Dépôts Total: {user[3]:.2f}$"
+    ),
+    reply_markup=InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔱 Accueil 🔱", callback_data='start')]
+    ])
+)
 # --- SHOP ---
 
 def show_shop(query):
