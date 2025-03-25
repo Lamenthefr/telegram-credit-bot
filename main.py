@@ -1,3 +1,4 @@
+
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -35,8 +36,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # ✅ Plus de Markdown, donc plus d'erreur de formatage
     await update.message.reply_text(text, reply_markup=reply_markup)
 
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,11 +67,11 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = update.effective_user
         user_data = database.get_user(user.id)
         if user_data:
-            await query.edit_message_text(f"💼 Votre solde : {user_data[2]:.2f} €")
+            await query.message.reply_text(f"💼 Votre solde : {user_data[2]:.2f} €")
         else:
-            await query.edit_message_text("❌ Utilisateur non trouvé.")
+            await query.message.reply_text("❌ Utilisateur non trouvé.")
     elif data == "menu_info":
-        await query.edit_message_text(
+        await query.message.reply_text(
             "📄 *Documents disponibles* :\n\n"
             "🇫🇷 France : Carte ID, Passeport, EDF, etc.\n"
             "🇺🇸 USA : SSN, Relevé bancaire\n"
@@ -87,9 +86,11 @@ async def main():
     application.add_handler(CommandHandler("solde", solde))
     application.add_handler(CommandHandler("info", info))
     application.add_handler(CommandHandler("recharger", handlers.recharge_menu))
+
     application.add_handler(CallbackQueryHandler(handle_buttons))
     application.add_handler(CallbackQueryHandler(handlers.recharge_buttons, pattern="^deposit_"))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.handle_message))
+
     application.add_handler(CommandHandler("ajouter_credit", admin_handlers.ajouter_credit))
     application.add_handler(CommandHandler("broadcast", admin_handlers.broadcast))
     application.add_handler(CommandHandler("stats", admin_handlers.stats))
