@@ -23,15 +23,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     database.create_user_if_not_exists(user.id, user.username)
 
-    text = (
-        f"Bonjour {user.first_name} !\n\n"
-        f"ID utilisateur : {user.id}\n"
-        f"Nom d'utilisateur : @{user.username}\n\n"
-        "🔱 Bienvenue dans l'AutoShop de Scan ID 🔱\n"
-        "Tous nos documents sont disponibles à *15€*\n"
-        "Les paiements s'effectuent uniquement en crypto.\n\n"
-        "📌 Cliquez sur 🔱 Infos 🔱 pour découvrir tout ce que nous proposons."
-    )
+text = (
+    f"Bonjour {user.first_name} !\n\n"
+    f"ID utilisateur : {user.id}\n"
+    f"Nom d'utilisateur : @{user.username}\n\n"
+    "🔱 <b>Bienvenue dans l'AutoShop de Scan ID</b> 🔱\n"
+    "Tous nos documents sont disponibles à <b>15€</b>\n"
+    "Les paiements s'effectuent uniquement en crypto.\n\n"
+    "📌 Cliquez sur 🔱 <b>Infos</b> 🔱 pour découvrir tout ce que nous proposons."
+)
 
     keyboard = [
         [InlineKeyboardButton("🔱 Générer mon Scan 🔱", callback_data="generate")],
@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔱 Infos 🔱", callback_data="menu_info")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')
+await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='HTML')
 
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
