@@ -24,8 +24,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = (
         f"Bonjour {user.first_name} !\n\n"
-        f"🔐 ID utilisateur : `{user.id}`\n"
-        f"📄 Nom d'utilisateur : @{user.username}\n\n"
+        f"ID utilisateur : {user.id}\n"
+        f"Nom d'utilisateur : @{user.username}\n\n"
         "Bienvenue dans notre AutoShop de documents. Voici ce que vous pouvez faire :"
     )
 
@@ -35,7 +35,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🔢 Infos", callback_data="menu_info")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_markdown(text, reply_markup=reply_markup)
+
+    # ✅ Plus de Markdown, donc plus d'erreur de formatage
+    await update.message.reply_text(text, reply_markup=reply_markup)
 
 async def solde(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
