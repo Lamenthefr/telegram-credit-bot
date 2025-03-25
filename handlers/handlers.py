@@ -12,8 +12,6 @@ import os
 
 NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
 
-# --- MENU PRINCIPAL ---
-
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
@@ -27,26 +25,21 @@ def button(update: Update, context: CallbackContext):
         show_deposit_options(query)
     elif data == 'retry_deposit':
         retry_deposit(update, context)
-    else:
-        print(f"Commande inconnue : {data}")
-
-# --- PROFIL ---
 
 def show_profile(query):
     user = database.get_user(query.from_user.id)
-  query.edit_message_text(
-    text=(
-        f"🔱 Nom d'utilisateur: @{user[1]}\n"
-        f"🔱 Votre ID: {user[0]}\n"
-        f"🔱 Grade: Membre\n"
-        f"🔱 Solde: {user[2]:.2f}€\n"
-        f"🔱 Dépôts Total: {user[3]:.2f}$"
-    ),
-    reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔱 Accueil 🔱", callback_data='start')]
-    ])
-)
-# --- SHOP ---
+    query.edit_message_text(
+        text=(
+            f"🔱 Nom d'utilisateur: @{user[1]}"
+            f"🔱 Votre ID: {user[0]}"
+            f"🔱 Grade: Membre"
+            f"🔱 Solde: {user[2]:.2f}€"
+            f"🔱 Dépôts Total: {user[3]:.2f}$"
+        ),
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔱 Accueil 🔱", callback_data='start')]
+        ])
+    )
 
 def show_shop(query):
     products = database.get_products()
@@ -56,13 +49,9 @@ def show_shop(query):
     ]
     keyboard.append([InlineKeyboardButton("🏠 Accueil", callback_data='start')])
     query.edit_message_text(
-        text="🔱 HORUS SHOP 🔱
-Choisissez un produit ci-dessous.
-Contact support : @horus_tlg",
+        text="🔱 HORUS SHOP 🔱\nChoisissez un produit ci-dessous.",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
-# --- DÉPÔT CRYPTO ---
 
 def show_deposit_options(query):
     user = database.get_user(query.from_user.id)
@@ -73,11 +62,12 @@ def show_deposit_options(query):
         [InlineKeyboardButton("🏠 Accueil", callback_data='start')]
     ]
     query.edit_message_text(
-        text=f"🔱 Salut, @{user[1]} !
-💰 Solde: {user[2]:.2f}€
-Choisissez une crypto pour recharger :",
+        text=f"🔱 Salut, @{user[1]} !\n💰 Solde: {user[2]:.2f}€\nChoisissez une crypto pour recharger :",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
+async def recharge_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await show_deposit_options(update.callback_query)
 
 async def recharge_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -154,9 +144,7 @@ def handle_crypto_deposit(chat_id, currency, amount, context):
         message = context.bot.send_photo(
             chat_id=chat_id,
             photo=open(qr_path, 'rb'),
-            caption=f"🔱 Envoyez {pay_amount} {currency.upper()} à :
-`{address}`
-⏱️ Temps restant : 19:00",
+            caption=f"🔱 Envoyez {pay_amount} {currency.upper()} à :\n`{address}`\n⏱️ Temps restant : 19:00",
             parse_mode='Markdown'
         )
 
@@ -180,8 +168,7 @@ def start_countdown(context, chat_id, message_id, expiration_time):
                 context.bot.edit_message_caption(
                     chat_id=chat_id,
                     message_id=message_id,
-                    caption=f"⏱️ Temps restant : {time_str}
-Envoyez votre paiement avant expiration.",
+                    caption=f"⏱️ Temps restant : {time_str}\nEnvoyez votre paiement avant expiration.",
                     parse_mode='Markdown'
                 )
             except telegram.error.BadRequest:
