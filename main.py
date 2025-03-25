@@ -8,7 +8,7 @@ from telegram.ext import (
 )
 from dotenv import load_dotenv
 import database
-import handlers_corrige as handlers
+import handlers.handlers as handlers
 import handlers.admin as admin_handlers
 
 load_dotenv()
