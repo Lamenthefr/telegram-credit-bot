@@ -1,3 +1,4 @@
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 import database
@@ -5,9 +6,9 @@ import utils
 import os
 import requests
 
-NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY")
+NOWPAYMENTS_API_KEY = "5RN4HYV-71DM8RM-QQQF69A-CWAYMM4"
 
-# 📲 Menu de recharge (boutons crypto)
+# 🔘 Étape 1 : Choix de crypto
 async def recharge_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
@@ -30,39 +31,80 @@ async def recharge_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
-# 💬 Après clic sur crypto → demander le montant
+# 🔘 Étape 2 : Choix du montant
 async def recharge_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     currency = query.data.split('_')[1]
     context.user_data['currency'] = currency
     context.user_data['state'] = 'ASK_AMOUNT'
 
-    await query.message.reply_text(f"💸 Entrez le montant à déposer en {currency.upper()} (minimum 10€) :")
+    await query.message.reply_text(
+        f"💸 Entrez le montant à déposer en {currency.upper()} (minimum 10€) :"
+    )
 
 
-# 🧠 Gestion du message texte pour entrer le montant
+# 🔘 Étape 3 : L'utilisateur entre un montant → appel API NowPayments
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     state = context.user_data.get('state')
     if state == "ASK_AMOUNT":
         try:
             amount = float(update.message.text)
-            if amount >= 10:
-                currency = context.user_data['currency']
-                await update.message.reply_text(f"🔄 Création de la demande de paiement de {amount:.2f}€ en {currency.upper()}...")
+            if amount < 10:
+                await update.message.reply_text("🚫 Le minimum de dépôt est de 10€.")
+                return
 
-                # Ici tu pourrais ajouter un appel vers une vraie fonction qui génère le lien via NowPayments
-                fake_address = f"1FakeAddressFor{currency.upper()}"
-                qr_path = utils.generate_qr_code(fake_address)
+            currency = context.user_data.get('currency', 'btc')
+            user_id = update.effective_user.id
 
-                await update.message.reply_photo(
-                    photo=open(qr_path, 'rb'),
-                    caption=f"⚡ Envoyez {amount} {currency.upper()} à :\n`{fake_address}`\n\n⚠️ Le paiement est valide 19 minutes.",
-                    parse_mode='Markdown'
-                )
-                context.user_data['state'] = None
-            else:
-                await update.message.reply_text("🚫 Le minimum de dépôt est 10€.")
+            # 🔌 Appel à NowPayments
+            headers = {
+                'x-api-key': NOWPAYMENTS_API_KEY,
+                'Content-Type': 'application/json'
+            }
+            data = {
+                'price_amount': amount,
+                'price_currency': 'eur',
+                'pay_currency': currency.lower(),
+                'order_description': f'Deposit user {user_id}'
+            }
+
+            response = requests.post('https://api.nowpayments.io/v1/payment', json=data, headers=headers)
+            res = response.json()
+
+            if 'pay_address' not in res:
+                await update.message.reply_text("❌ Erreur : Impossible de créer l'adresse de paiement. Réessayez.")
+                return
+
+            pay_address = res['pay_address']
+            pay_amount = res['pay_amount']
+
+            # 🧾 Génération du QR code temporaire
+            qr_path = utils.generate_qr_code(pay_address)
+
+            # 📤 Envoi au user
+            await update.message.reply_photo(
+                photo=open(qr_path, 'rb'),
+                caption=(
+                    f"✅ Adresse générée pour dépôt :\n"
+                    f"`{pay_address}`\n\n"
+                    f"💸 Montant exact : *{pay_amount} {currency.upper()}*\n\n"
+                    f"⏱️ Paiement valide pendant environ 20 minutes."
+                ),
+                parse_mode="Markdown"
+            )
+
+            context.user_data['state'] = None
+
+            # ❌ Optionnel : supprimer le fichier après envoi (si tu veux pas le garder)
+            try:
+                os.remove(qr_path)
+            except:
+                pass
+
         except ValueError:
             await update.message.reply_text("❌ Veuillez entrer un montant valide.")
     else:
-        await update.message.reply_text("❌ Commande non reconnue.")
+        await update.message.reply_text(
+            "❌ Commande non reconnue. Cliquez sur *Recharger* puis choisissez une crypto.",
+            parse_mode="Markdown"
+        )
